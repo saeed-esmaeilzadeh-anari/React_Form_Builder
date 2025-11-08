@@ -55,7 +55,6 @@ export function withUltimateSafeRender<P extends object>(
 
       onError?.(error, errorInfo)
 
-      // Auto-retry with exponential backoff
       if (this.state.retryAttempt < retryCount) {
         const delay = Math.pow(2, this.state.retryAttempt) * 1000
         this.retryTimeout = setTimeout(() => {
@@ -81,7 +80,6 @@ export function withUltimateSafeRender<P extends object>(
         isLoading: true,
       })
 
-      // Simulate loading time
       setTimeout(() => {
         this.setState({ isLoading: false })
       }, 500)
@@ -176,7 +174,6 @@ export function useUltimateSafeState<T>(initialValue: T): [T, (value: T | ((prev
         setState(value)
       } catch (error) {
         logger.error("Safe setState failed", { error })
-        // Try to reset to initial value
         try {
           setState(initialValue)
         } catch (resetError) {
@@ -218,10 +215,9 @@ export function useUltimateSafeCallback<T extends (...args: any[]) => any>(callb
   }, deps) as T
 }
 
-// Safe async hook
 export function useUltimateSafeAsync<T>(
   asyncFn: () => Promise<T>,
-  deps: React.DependencyList = [],
+  deps?: React.DependencyList,
 ): {
   data: T | null
   loading: boolean
@@ -245,7 +241,7 @@ export function useUltimateSafeAsync<T>(
     } finally {
       setLoading(false)
     }
-  }, deps)
+  }, deps || [])
 
   useUltimateSafeEffect(() => {
     execute()
@@ -254,9 +250,6 @@ export function useUltimateSafeAsync<T>(
   return { data, loading, error, retry: execute }
 }
 
-// -----------------------------------------------------------------------------
-// 🔄  Back-compat aliases ─ keep older imports working
-// -----------------------------------------------------------------------------
 export {
   useUltimateSafeCallback as useSafeCallback,
   useUltimateSafeState as useSafeState,

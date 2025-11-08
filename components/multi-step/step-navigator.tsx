@@ -140,80 +140,78 @@ export function StepNavigator({
         </div>
 
         <div className="grid grid-cols-1 gap-2">
-          {pages.map((page, index) => (
-            <motion.div
-              key={page.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card
-                className={`cursor-pointer transition-all duration-200 ${getStatusColor(index)} ${
-                  index === currentPageIndex ? "ring-2 ring-blue-500" : ""
-                }`}
-                onClick={() => handlePageClick(index)}
+          {pages.map((page, index) => {
+            if (!page || !page.id) return null
+
+            return (
+              <motion.div
+                key={page.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
               >
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(index)}
-                      <div>
-                        <h4 className="font-medium text-gray-900">{page.title}</h4>
-                        {page.description && <p className="text-sm text-gray-600 mt-1">{page.description}</p>}
+                <Card
+                  className={`cursor-pointer transition-all duration-200 border-l-4 ${
+                    index === currentPageIndex ? "ring-2 ring-blue-500" : ""
+                  }`}
+                  onClick={() => handlePageClick(index)}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-4 h-4 bg-blue-500 rounded-full" />
+                        <div>
+                          <h4 className="font-medium text-gray-900">{page.title || "Untitled Page"}</h4>
+                          {page.description && <p className="text-sm text-gray-600 mt-1">{page.description}</p>}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {page.sections?.length || 0} sections
+                        </Badge>
+
+                        {showPreview && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setExpandedPage(expandedPage === index ? null : index)
+                            }}
+                          >
+                            <ChevronRight
+                              className={`w-4 h-4 transition-transform ${expandedPage === index ? "rotate-90" : ""}`}
+                            />
+                          </Button>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {page.sections.length} sections
-                      </Badge>
-
-                      {validationErrors[page.id]?.length > 0 && (
-                        <Badge variant="destructive" className="text-xs">
-                          {validationErrors[page.id].length} errors
-                        </Badge>
-                      )}
-
-                      {showPreview && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setExpandedPage(expandedPage === index ? null : index)
-                          }}
+                    <AnimatePresence>
+                      {showPreview && expandedPage === index && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-3 pt-3 border-t border-gray-200"
                         >
-                          <ChevronRight
-                            className={`w-4 h-4 transition-transform ${expandedPage === index ? "rotate-90" : ""}`}
-                          />
-                        </Button>
+                          <div className="space-y-2">
+                            {page.sections?.map((section) => (
+                              <div key={section.id} className="text-sm">
+                                <span className="font-medium text-gray-700">{section.title}</span>
+                                <span className="text-gray-500 ml-2">({section.fields?.length || 0} fields)</span>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
                       )}
-                    </div>
-                  </div>
-
-                  <AnimatePresence>
-                    {showPreview && expandedPage === index && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-3 pt-3 border-t border-gray-200"
-                      >
-                        <div className="space-y-2">
-                          {page.sections.map((section) => (
-                            <div key={section.id} className="text-sm">
-                              <span className="font-medium text-gray-700">{section.title}</span>
-                              <span className="text-gray-500 ml-2">({section.fields.length} fields)</span>
-                            </div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                    </AnimatePresence>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
 
@@ -233,8 +231,8 @@ export function StepNavigator({
           {!isLastPage && (
             <div className="text-sm text-gray-500">
               <Clock className="w-4 h-4 inline mr-1" />
-              Estimated time: {pages.slice(currentPageIndex).reduce((acc, page) => acc + page.sections.length * 2, 0)}{" "}
-              min
+              Estimated time:{" "}
+              {pages.slice(currentPageIndex).reduce((acc, page) => acc + (page.sections?.length || 0) * 2, 0)} min
             </div>
           )}
         </div>
