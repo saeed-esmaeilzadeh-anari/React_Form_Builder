@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "FormCraft Pro - Ultimate Form Builder",
   description: "Professional form builder with zero runtime errors",
-    generator: 'v0.dev'
+    generator: 'v0.app'
 }
 
 // Initialize ultimate protection
